@@ -139,16 +139,38 @@ new VectorLayer({
   map.addLayer(vectorLayer);
 
 
+//add a popup to the map
+map.on('click', function (evt) {
+  var feature = map.forEachFeatureAtPixel(evt.pixel,
+    function (feature) {
+      return feature;
+    });
+  if (feature) {
+    var geometry = feature.getGeometry();
+    var coord = geometry.getCoordinates();
+    overlay.setPosition(coord);
+    //give the information of the id and nuclide of the feature and locality name
+    content.innerHTML = '<p>Id: ' + feature.get('id') + '</p><p>Nuclide: ' + feature.get('nuclide') + '</p><p>Locality: ' + feature.get('locality_name') + '</p>';
 
-
-
-map.on('singleclick', function (evt) {
-  const coordinate = evt.coordinate;
-  const hdms = toStringHDMS(toLonLat(coordinate));
-
-  content.innerHTML = '<p>You clicked here:</p><code>' + hdms + '</code>';
-  overlay.setPosition(coordinate);
+  } else {
+    overlay.setPosition(undefined);
+    closer.blur();
+  }
 });
+
+closer.onclick = function () {
+  overlay.setPosition(undefined);
+  closer.blur();
+  return false;
+};
+
+// map.on('singleclick', function (evt) {
+//   const coordinate = evt.coordinate;
+//   const hdms = toStringHDMS(toLonLat(coordinate));
+
+//   content.innerHTML = '<p>You clicked here:</p><code>' + hdms + '</code>';
+//   overlay.setPosition(coordinate);
+// });
 
 
 
