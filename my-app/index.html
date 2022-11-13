@@ -2,6 +2,20 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
+    <script>
+      var allData
+      function ajax_request(){
+      var xmlhttp = new XMLHttpRequest()
+      xmlhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          allData = this.responseText
+        }
+      }
+      xmlhttp.open('GET', 'data.php', true)
+      xmlhttp.send()
+      
+    }
+    </script>
     <title>Geolocation</title>
     <link rel="stylesheet" href="node_modules/ol/ol.css">
     <style>
@@ -11,12 +25,14 @@
       }
     </style>
   </head>
-  <body>
+  <body onload="ajax_request()">
     <div id="map" class="map"></div>
     <div id="popup" class="ol-popup">
       <a href="closer" id="popup-closer" class="ol-popup-closer"></a>
       <div id="popup-content"></div>
     </div>
+    <!-- getData div to create a popup -->
+    <div id="getData"></div>
     <div id="info" style="display: none;"></div>
     <label for="track">
       track position

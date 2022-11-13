@@ -10,8 +10,6 @@ import Geolocation from 'ol/Geolocation';
 import Point from 'ol/geom/Point';
 import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style';
 import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer';
-import {toStringHDMS} from 'ol/coordinate';
-import {toLonLat} from 'ol/proj';
 //cors error header
 
 
@@ -140,37 +138,68 @@ new VectorLayer({
 
 
 //add a popup to the map
+// map.on('click', function (evt) {
+//   var feature = map.forEachFeatureAtPixel(evt.pixel,
+//     function (feature) {
+//       return feature;
+//     });
+//   if (feature) {
+//     var geometry = feature.getGeometry();
+//     var coord = geometry.getCoordinates();
+//     overlay.setPosition(coord);
+//     //give the information of the id and nuclide of the feature and locality name
+//     content.innerHTML = '<p>Id: ' + feature.get('id') + '</p><p>Nuclide: ' + feature.get('nuclide') + '</p><p>Locality: ' + feature.get('locality_name') + '</p>';
+
+//   } else {
+//     overlay.setPosition(undefined);
+//     closer.blur();
+//   }
+// });
+
+// closer.onclick = function () {
+//   overlay.setPosition(undefined);
+//   closer.blur();
+//   return false;
+// };
+
 map.on('click', function (evt) {
-  var feature = map.forEachFeatureAtPixel(evt.pixel,
-    function (feature) {
-      return feature;
-    });
-  if (feature) {
+  map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
     var geometry = feature.getGeometry();
     var coord = geometry.getCoordinates();
     overlay.setPosition(coord);
-    //give the information of the id and nuclide of the feature and locality name
+  //send the information of the id and nuclide of the feature and locality name to the postman api
     content.innerHTML = '<p>Id: ' + feature.get('id') + '</p><p>Nuclide: ' + feature.get('nuclide') + '</p><p>Locality: ' + feature.get('locality_name') + '</p>';
+    var id = feature.get('id');
+    var nuclide = feature.get('nuclide');
+    var locality = feature.get('locality_name');
+    var longitude = coord[0];
+    var latitude = coord[1];
+    var data = {
+      id: id,
+      nuclide: nuclide,
+      locality: locality,
+      //get latitude and longitude
+      latitude: latitude,
+      longitude: longitude,
 
-  } else {
-    overlay.setPosition(undefined);
-    closer.blur();
-  }
+    }
+    saveData(data);
+
+  });
+
 });
 
-closer.onclick = function () {
-  overlay.setPosition(undefined);
-  closer.blur();
-  return false;
-};
-
-// map.on('singleclick', function (evt) {
-//   const coordinate = evt.coordinate;
-//   const hdms = toStringHDMS(toLonLat(coordinate));
-
-//   content.innerHTML = '<p>You clicked here:</p><code>' + hdms + '</code>';
-//   overlay.setPosition(coordinate);
-// });
-
-
-
+function saveData(data) {
+  //use ajax to send data to postgresql database
+  $.ajax({
+    type: "POST",
+    url: "save.php",
+    data: data,
+    success: function (response) {
+      console.log(response);
+    },
+    error: function (error) {
+      console.log(error);
+    }
+  });
+}
