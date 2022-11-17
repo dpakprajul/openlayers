@@ -169,37 +169,31 @@ map.on('click', function (evt) {
     overlay.setPosition(coord);
   //send the information of the id and nuclide of the feature and locality name to the postman api
     content.innerHTML = '<p>Id: ' + feature.get('id') + '</p><p>Nuclide: ' + feature.get('nuclide') + '</p><p>Locality: ' + feature.get('locality_name') + '</p>';
-    var id = feature.get('id');
+
     var nuclide = feature.get('nuclide');
     var locality = feature.get('locality_name');
-    var longitude = coord[0];
-    var latitude = coord[1];
+    var latitute = feature.get('latitude');
+    var longitude = feature.get('longitude');
+
     var data = {
-      id: id,
       nuclide: nuclide,
       locality: locality,
-      //get latitude and longitude
-      latitude: latitude,
-      longitude: longitude,
-
+      latitute: latitute,
+      longitude: longitude
     }
-    saveData(data);
+
+    //send it to postgresql database using ajax
+    $.ajax({
+      type: "POST",
+      url: 'save.php',
+      data: data,
+      success: function (response) {
+        console.log(response);
+      }
 
   });
+});
+
 
 });
 
-function saveData(data) {
-  //use ajax to send data to postgresql database
-  $.ajax({
-    type: "POST",
-    url: "save.php",
-    data: data,
-    success: function (response) {
-      console.log(response);
-    },
-    error: function (error) {
-      console.log(error);
-    }
-  });
-}
